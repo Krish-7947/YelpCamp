@@ -4,7 +4,12 @@
   <div class="row">
     <h1 class="text-center">Edit Campground</h1>
     <div class="col-6 offset-3">
-      <form action="/campgrounds/<%= camp._id %>?_method=PUT" method="post">
+      <form
+        action="/campgrounds/<%= camp._id %>?_method=PUT"
+        method="post"
+        class="Validate-form"
+        novalidate
+      >
         <div class="mb-3">
           <label for="title" class="form-label">Enter the title</label>
           <input
@@ -14,6 +19,7 @@
             class="form-control"
             value="<%= camp.title %>"
             onfocus="this.select()"
+            required
           />
         </div>
         <div class="mb-3">
@@ -25,6 +31,7 @@
             class="form-control"
             value="<%= camp.location %>"
             onfocus="this.select()"
+            required
           />
         </div>
         <div class="mb-3">
@@ -36,6 +43,7 @@
             class="form-control"
             value="<%= camp.image %>"
             onfocus="this.select()"
+            required
           />
         </div>
         <div class="mb-3">
@@ -48,6 +56,7 @@
               name="price"
               value="<%= camp.price %>"
               onfocus="this.select()"
+              required
             />
           </div>
         </div>
@@ -59,6 +68,7 @@
             id="description"
             rows="3"
             onfocus="this.select()"
+            required
           >
           <%= camp.description %>
           </textarea>
@@ -71,3 +81,16 @@
     </div>
   </div>
 </div>
+
+<script>
+  document.querySelectorAll(".Validate-form").forEach((form) => {
+    form.addEventListener("submit", (e) => {
+      if (!form.checkValidity()) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+
+      form.classList.add("was-validated");
+    });
+  });
+</script>
