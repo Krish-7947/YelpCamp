@@ -1,8 +1,8 @@
 <% layout('layouts/boilerplate.ejs') %>
 
-<h2>All campgrounds</h2>
+<h1 class="text-center mb-3">All campgrounds</h1>
 
-<section class="d-flex flex-wrap gap-3 mb-4">
+<section class="d-flex flex-wrap gap-3 mb-4 mx-5">
     <% for(let camp of campgrounds){ %>
     <div class="card" style="width: 18rem;" >
   <img src="<%= camp.image %>" class="card-img-top">
