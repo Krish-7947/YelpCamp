@@ -4,9 +4,11 @@ const path = require("path");
 const mongoose = require("mongoose");
 const methodoverride = require("method-override");
 const ejs_mate = require("ejs-mate");
+const ExpressError = require("./utils/ExpressError");
 
 const app = express();
 const Campground = require("./models/campground");
+const { joiCampgroundSchema } = require("./JOIschemas");
 
 // MongoDB connection
 mongoose.connect("mongodb://127.0.0.1:27017/YelpCamp");
@@ -28,8 +30,19 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(methodoverride("_method"));
 
+// Joi validation
+const validateCamp = (req, res, next) => {
+  const { error } = joiCampgroundSchema.validate(req.body);
+  if (error) {
+    const msg = error.details.map((el) => el.message).join(",");
+    throw new ExpressError(400, msg);
+  } else {
+    next();
+  }
+};
+
 // routes
-// all
+// all campgrounds
 app.get("/campgrounds", async (req, res) => {
   const campgrounds = await Campground.find({});
   res.render("campgrounds/index", { campgrounds });
@@ -41,7 +54,7 @@ app.get("/campgrounds/new", (req, res) => {
 });
 
 // adding new campground to db
-app.post("/campgrounds", async (req, res) => {
+app.post("/campgrounds", validateCamp, async (req, res) => {
   const newcamp = new Campground(req.body);
   await newcamp.save();
   res.redirect(`/campgrounds/${newcamp._id}`);
@@ -60,7 +73,7 @@ app.get("/campgrounds/:id/edit", async (req, res) => {
 });
 
 // edit in db
-app.put("/campgrounds/:id", async (req, res) => {
+app.put("/campgrounds/:id", validateCamp, async (req, res) => {
   await Campground.findByIdAndUpdate(req.params.id, req.body);
   res.redirect(`/campgrounds/${req.params.id}`);
 });
@@ -72,6 +85,12 @@ app.delete("/campgrounds/:id", async (req, res) => {
 });
 
 // error handeling
+app.all("/{*path}", (req, res, next) => {
+  next(new ExpressError(404, "Page Not Found"));
+});
+
 app.use((err, req, res, next) => {
-  res.send("ERRROOOOORRRR!!!!!!!!!!!");
+  if (!err.message) err.message = "Something Went Wrong !!";
+  if (!err.status) err.status = 500;
+  res.status(err.status).render("campgrounds/error", { err });
 });
