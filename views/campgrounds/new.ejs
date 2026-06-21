@@ -1,22 +1,14 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>New Campground</title>
-</head>
-<body>
-    <form action="/campgrounds" method="post">
-        <div>
-            <label for="title">Enter the title</label>
-            <input type="text" id="title" name="title">
-        </div>
-        <div>
-            <label for="location">Enter the location</label>
-            <input type="text" id="location" name="location">
-        </div>
-        <button>Add New Campground</button>
-    </form>
-    <a href="/campgrounds">Back to home</a>
-</body>
-</html>
+<% layout('layouts/boilerplate.ejs') %>
+
+<form action="/campgrounds" method="post">
+  <div>
+    <label for="title">Enter the title</label>
+    <input type="text" id="title" name="title" />
+  </div>
+  <div>
+    <label for="location">Enter the location</label>
+    <input type="text" id="location" name="location" />
+  </div>
+  <button>Add New Campground</button>
+</form>
+<a href="/campgrounds">Back to home</a>
