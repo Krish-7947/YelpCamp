@@ -1,19 +1,73 @@
 <% layout('layouts/boilerplate.ejs') %>
 
-<form action="/campgrounds/<%= camp._id %>?_method=PUT" method="post">
-  <div>
-    <label for="title">Enter the title</label>
-    <input type="text" id="title" name="title" value="<%= camp.title %>" />
+<div class="container mt-1">
+  <div class="row">
+    <h1 class="text-center">Edit Campground</h1>
+    <div class="col-6 offset-3">
+      <form action="/campgrounds/<%= camp._id %>?_method=PUT" method="post">
+        <div class="mb-3">
+          <label for="title" class="form-label">Enter the title</label>
+          <input
+            type="text"
+            id="title"
+            name="title"
+            class="form-control"
+            value="<%= camp.title %>"
+            onfocus="this.select()"
+          />
+        </div>
+        <div class="mb-3">
+          <label for="location" class="form-label">Enter the location</label>
+          <input
+            type="text"
+            id="location"
+            name="location"
+            class="form-control"
+            value="<%= camp.location %>"
+            onfocus="this.select()"
+          />
+        </div>
+        <div class="mb-3">
+          <label for="image" class="form-label">Enter the image URL</label>
+          <input
+            type="text"
+            id="image"
+            name="image"
+            class="form-control"
+            value="<%= camp.image %>"
+            onfocus="this.select()"
+          />
+        </div>
+        <div class="mb-3">
+          <label for="price" class="form-label">Price :</label>
+          <div class="input-group mb-3">
+            <span class="input-group-text">&#8377;</span>
+            <input
+              type="number"
+              class="form-control"
+              name="price"
+              value="<%= camp.price %>"
+              onfocus="this.select()"
+            />
+          </div>
+        </div>
+        <div class="mb-3">
+          <label for="description" class="form-label">Description :</label>
+          <textarea
+            class="form-control"
+            name="description"
+            id="description"
+            rows="3"
+            onfocus="this.select()"
+          >
+          <%= camp.description %>
+          </textarea>
+        </div>
+        <button class="btn btn-success">Update the Campground</button
+        ><a class="btn btn-secondary ms-2" href="/campgrounds/<%= camp._id %>"
+          >Back</a
+        >
+      </form>
+    </div>
   </div>
-  <div>
-    <label for="location">Enter the location</label>
-    <input
-      type="text"
-      id="location"
-      name="location"
-      value="<%= camp.location %>"
-    />
-  </div>
-  <button>Update the Campground</button>
-</form>
-<a href="/campgrounds/<%= camp._id %>">Back</a>
+</div>
