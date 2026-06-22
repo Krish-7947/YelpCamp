@@ -32,7 +32,7 @@ app.use(methodoverride("_method"));
 
 // Joi validation
 const validateCamp = (req, res, next) => {
-	const { error } = joiCampgroundSchema.validate(req.body);
+	const { error } = joiCampgroundSchema.validate(req.body.campground);
 	if (error) {
 		const msg = error.details.map((el) => el.message).join(",");
 		throw new ExpressError(400, msg);
@@ -55,7 +55,7 @@ app.get("/campgrounds/new", (req, res) => {
 
 // adding new campground to db
 app.post("/campgrounds", validateCamp, async (req, res) => {
-	const newcamp = new Campground(req.body);
+	const newcamp = new Campground(req.body.campground);
 	await newcamp.save();
 	res.redirect(`/campgrounds/${newcamp._id}`);
 });
@@ -74,7 +74,7 @@ app.get("/campgrounds/:id/edit", async (req, res) => {
 
 // edit in db
 app.put("/campgrounds/:id", validateCamp, async (req, res) => {
-	await Campground.findByIdAndUpdate(req.params.id, req.body);
+	await Campground.findByIdAndUpdate(req.params.id, req.body.campground);
 	res.redirect(`/campgrounds/${req.params.id}`);
 });
 

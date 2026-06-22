@@ -13,13 +13,8 @@
 				<li class="list-group-item">&#8377;<%= camp.price%>/Night</li>
 			</ul>
 			<div class="card-body">
-				<a href="/campgrounds/<%= camp._id %>/edit" class="btn btn-info"
-					>Edit</a
-				>
-				<form
-					action="/campgrounds/<%= camp._id %>/?_method=delete"
-					method="post"
-					class="d-inline">
+				<a href="/campgrounds/<%= camp._id %>/edit" class="btn btn-info">Edit</a>
+				<form action="/campgrounds/<%= camp._id %>/?_method=delete" method="post" class="d-inline">
 					<button class="btn btn-danger">Delete</button>
 				</form>
 			</div>
