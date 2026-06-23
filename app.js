@@ -72,7 +72,7 @@ app.post("/campgrounds", validateCamp, async (req, res) => {
 
 // show
 app.get("/campgrounds/:id", async (req, res) => {
-	const camp = await Campground.findById(req.params.id);
+	const camp = await Campground.findById(req.params.id).populate("reviews");
 	res.render("campgrounds/details", { camp });
 });
 
@@ -105,6 +105,17 @@ app.post("/campgrounds/:id/reviews", validateReview, async (req, res) => {
 	await camp.save();
 
 	res.redirect(`/campgrounds/${camp._id}`);
+});
+
+// delete review
+app.delete("/campgrounds/:campId/reviews/:reviewId", async (req, res) => {
+	const { campId, reviewId } = req.params;
+	await Campground.findByIdAndUpdate(campId, {
+		$pull: { reviews: reviewId },
+	});
+	await Review.findByIdAndDelete(reviewId);
+
+	res.redirect(`/campgrounds/${campId}`);
 });
 
 // error handeling

@@ -1,7 +1,7 @@
 <% layout('layouts/boilerplate.ejs') %>
 
 <div class="row mb-3">
-	<div class="col-6 offset-3">
+	<div class="col-6">
 		<div class="card mb-3">
 			<img src="<%= camp.image %>" class="card-img-top" />
 			<div class="card-body">
@@ -14,11 +14,14 @@
 			</ul>
 			<div class="card-body">
 				<a href="/campgrounds/<%= camp._id %>/edit" class="btn btn-info">Edit</a>
-				<form action="/campgrounds/<%= camp._id %>/?_method=delete" method="post" class="d-inline">
+				<form action="/campgrounds/<%= camp._id %>?_method=delete" method="post" class="d-inline">
 					<button class="btn btn-danger">Delete</button>
 				</form>
 			</div>
 		</div>
+
+	</div>
+	<div class="col-6">
 		<h2>Leave a review</h2>
 		<form action="/campgrounds/<%= camp._id %>/reviews" method="post" class="mb-3 Validate-form" novalidate>
 			<div class="mb-3">
@@ -31,5 +34,16 @@
 			</div>
 			<button class="btn btn-success">Submit</button>
 		</form>
+		<% for(let review of camp.reviews){ %>
+		<div class="card mb-3">
+			<div class="card-body">
+				<h5 class="card-title">Rating : <%= review.rating%></h5>
+				<p class="card-text"><%= review.body%></p>
+				<form action="/campgrounds/<%= camp._id %>/reviews/<%= review._id %>/?_method=delete" method="post">
+					<button class="btn btn-sm btn-danger">Delete</button>
+				</form>
+			</div>
+		</div>
+		<% } %>
 	</div>
 </div>
