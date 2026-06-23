@@ -8,7 +8,8 @@ const ExpressError = require("./utils/ExpressError");
 
 const app = express();
 const Campground = require("./models/campground");
-const { joiCampgroundSchema } = require("./JOIschemas");
+const Review = require("./models/review");
+const { joiCampgroundSchema, joiReviewSchema } = require("./JOIschemas");
 
 // MongoDB connection
 mongoose.connect("mongodb://127.0.0.1:27017/YelpCamp");
@@ -32,7 +33,16 @@ app.use(methodoverride("_method"));
 
 // Joi validation
 const validateCamp = (req, res, next) => {
-	const { error } = joiCampgroundSchema.validate(req.body.campground);
+	const { error } = joiCampgroundSchema.validate(req.body);
+	if (error) {
+		const msg = error.details.map((el) => el.message).join(",");
+		throw new ExpressError(400, msg);
+	} else {
+		next();
+	}
+};
+const validateReview = (req, res, next) => {
+	const { error } = joiReviewSchema.validate(req.body);
 	if (error) {
 		const msg = error.details.map((el) => el.message).join(",");
 		throw new ExpressError(400, msg);
@@ -41,7 +51,7 @@ const validateCamp = (req, res, next) => {
 	}
 };
 
-// routes
+// campground routes
 // all campgrounds
 app.get("/campgrounds", async (req, res) => {
 	const campgrounds = await Campground.find({});
@@ -82,6 +92,19 @@ app.put("/campgrounds/:id", validateCamp, async (req, res) => {
 app.delete("/campgrounds/:id", async (req, res) => {
 	await Campground.findByIdAndDelete(req.params.id);
 	res.redirect("/campgrounds");
+});
+
+// review routes
+// add a review
+app.post("/campgrounds/:id/reviews", validateReview, async (req, res) => {
+	const camp = await Campground.findById(req.params.id);
+	const new_review = new Review(req.body.review);
+
+	camp.reviews.push(new_review);
+	await new_review.save();
+	await camp.save();
+
+	res.redirect(`/campgrounds/${camp._id}`);
 });
 
 // error handeling
