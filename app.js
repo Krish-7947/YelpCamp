@@ -5,11 +5,37 @@ const mongoose = require("mongoose");
 const methodoverride = require("method-override");
 const ejs_mate = require("ejs-mate");
 const ExpressError = require("./utils/ExpressError");
+const session = require("express-session");
+const flash = require("connect-flash");
 
 const app = express();
-const Campground = require("./models/campground");
-const Review = require("./models/review");
-const { joiCampgroundSchema, joiReviewSchema } = require("./JOIschemas");
+
+// Session Stuff
+app.use(
+	session({
+		secret: "nothingfornow",
+		resave: false,
+		saveUninitialized: true,
+		cookie: {
+			httpOnly: true,
+			expires: Date.now() + 7 * 24 * 60 * 60 * 1000,
+		},
+	}),
+);
+
+// Flash stuff
+app.use(flash());
+
+app.use((req, res, next) => {
+	res.locals.success = req.flash("success");
+	res.locals.error = req.flash("error");
+	res.locals.deleteSuccess = req.flash("delete");
+	next();
+});
+
+// Router exports
+const campgroundRouter = require("./routes/campgrounds");
+const reviewRouter = require("./routes/reviews");
 
 // MongoDB connection
 mongoose.connect("mongodb://127.0.0.1:27017/YelpCamp");
@@ -30,93 +56,11 @@ app.set("views", path.join(__dirname, "views"));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(methodoverride("_method"));
+app.use(express.static(path.join(__dirname, "public")));
 
-// Joi validation
-const validateCamp = (req, res, next) => {
-	const { error } = joiCampgroundSchema.validate(req.body);
-	if (error) {
-		const msg = error.details.map((el) => el.message).join(",");
-		throw new ExpressError(400, msg);
-	} else {
-		next();
-	}
-};
-const validateReview = (req, res, next) => {
-	const { error } = joiReviewSchema.validate(req.body);
-	if (error) {
-		const msg = error.details.map((el) => el.message).join(",");
-		throw new ExpressError(400, msg);
-	} else {
-		next();
-	}
-};
-
-// campground routes
-// all campgrounds
-app.get("/campgrounds", async (req, res) => {
-	const campgrounds = await Campground.find({});
-	res.render("campgrounds/index", { campgrounds });
-});
-
-// new campground form
-app.get("/campgrounds/new", (req, res) => {
-	res.render("campgrounds/new");
-});
-
-// adding new campground to db
-app.post("/campgrounds", validateCamp, async (req, res) => {
-	const newcamp = new Campground(req.body.campground);
-	await newcamp.save();
-	res.redirect(`/campgrounds/${newcamp._id}`);
-});
-
-// show
-app.get("/campgrounds/:id", async (req, res) => {
-	const camp = await Campground.findById(req.params.id).populate("reviews");
-	res.render("campgrounds/details", { camp });
-});
-
-// edit form
-app.get("/campgrounds/:id/edit", async (req, res) => {
-	const camp = await Campground.findById(req.params.id);
-	res.render("campgrounds/edit", { camp });
-});
-
-// edit in db
-app.put("/campgrounds/:id", validateCamp, async (req, res) => {
-	await Campground.findByIdAndUpdate(req.params.id, req.body.campground);
-	res.redirect(`/campgrounds/${req.params.id}`);
-});
-
-// delete
-app.delete("/campgrounds/:id", async (req, res) => {
-	await Campground.findByIdAndDelete(req.params.id);
-	res.redirect("/campgrounds");
-});
-
-// review routes
-// add a review
-app.post("/campgrounds/:id/reviews", validateReview, async (req, res) => {
-	const camp = await Campground.findById(req.params.id);
-	const new_review = new Review(req.body.review);
-
-	camp.reviews.push(new_review);
-	await new_review.save();
-	await camp.save();
-
-	res.redirect(`/campgrounds/${camp._id}`);
-});
-
-// delete review
-app.delete("/campgrounds/:campId/reviews/:reviewId", async (req, res) => {
-	const { campId, reviewId } = req.params;
-	await Campground.findByIdAndUpdate(campId, {
-		$pull: { reviews: reviewId },
-	});
-	await Review.findByIdAndDelete(reviewId);
-
-	res.redirect(`/campgrounds/${campId}`);
-});
+// Router Set Up
+app.use("/campgrounds", campgroundRouter);
+app.use("/campgrounds/:id/reviews", reviewRouter);
 
 // error handeling
 app.all("/{*path}", (req, res, next) => {
