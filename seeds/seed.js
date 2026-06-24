@@ -5,6 +5,7 @@ const { descriptors, places } = require("./helper");
 
 const Campground = require("../models/campground");
 const Review = require("../models/review");
+const User = require("../models/user");
 
 mongoose.connect("mongodb://127.0.0.1:27017/YelpCamp");
 
@@ -34,6 +35,7 @@ const Seed_Data_Base = async () => {
 	try {
 		await Campground.deleteMany({});
 		await Review.deleteMany({});
+		await User.deleteMany({});
 		const images = await apirequest();
 		for (let i = 0; i < 50; i++) {
 			let random = Math.floor(Math.random() * 1000);

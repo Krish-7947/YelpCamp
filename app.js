@@ -7,6 +7,8 @@ const ejs_mate = require("ejs-mate");
 const ExpressError = require("./utils/ExpressError");
 const session = require("express-session");
 const flash = require("connect-flash");
+const passport = require("passport");
+const passportLocal = require("passport-local");
 
 const app = express();
 
@@ -23,10 +25,21 @@ app.use(
 	}),
 );
 
+// Passport Authentication
+const User = require("./models/user");
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+passport.use(new passportLocal(User.authenticate()));
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
+
 // Flash stuff
 app.use(flash());
 
 app.use((req, res, next) => {
+	res.locals.currentUser = req.user;
 	res.locals.success = req.flash("success");
 	res.locals.error = req.flash("error");
 	res.locals.deleteSuccess = req.flash("delete");
@@ -36,6 +49,7 @@ app.use((req, res, next) => {
 // Router exports
 const campgroundRouter = require("./routes/campgrounds");
 const reviewRouter = require("./routes/reviews");
+const userRouter = require("./routes/users");
 
 // MongoDB connection
 mongoose.connect("mongodb://127.0.0.1:27017/YelpCamp");
@@ -61,6 +75,7 @@ app.use(express.static(path.join(__dirname, "public")));
 // Router Set Up
 app.use("/campgrounds", campgroundRouter);
 app.use("/campgrounds/:id/reviews", reviewRouter);
+app.use("/", userRouter);
 
 // error handeling
 app.all("/{*path}", (req, res, next) => {
