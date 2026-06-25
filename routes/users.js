@@ -45,7 +45,6 @@ router.post(
 	}),
 	(req, res) => {
 		const url = res.locals.returnTo || "/campgrounds";
-		delete req.session.returnTo;
 		req.flash("success", "Welcome back to YelpCamp !");
 		res.redirect(url);
 	},

@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const passport = require("passport");
 const axios = require("axios");
 const cities = require("./cities");
 const { descriptors, places } = require("./helper");
@@ -36,12 +37,18 @@ const Seed_Data_Base = async () => {
 		await Campground.deleteMany({});
 		await Review.deleteMany({});
 		await User.deleteMany({});
+		const dummyUser = new User({
+			username: "a",
+			email: "a@a.com",
+		});
+		const registeredUser = await User.register(dummyUser, "a");
 		const images = await apirequest();
 		for (let i = 0; i < 50; i++) {
 			let random = Math.floor(Math.random() * 1000);
 			let price = Math.floor(Math.random() * 2000);
 
 			const newCamp = new Campground({
+				author: registeredUser._id,
 				location: `${cities[random].city},${cities[random].state}`,
 				title: `${randomElement(descriptors)} ${randomElement(places)}`,
 				image: images[i].src.original,

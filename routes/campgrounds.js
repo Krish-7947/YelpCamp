@@ -4,24 +4,8 @@ const router = express.Router({ mergeParams: true });
 // model
 const Campground = require("../models/campground");
 
-// JOI schemas
-const { joiCampgroundSchema } = require("../JOIschemas");
-
-// error class
-const ExpressError = require("../utils/ExpressError");
-
-const { isLoggedIn } = require("../middleware");
-
-// Joi validation
-const validateCamp = (req, res, next) => {
-	const { error } = joiCampgroundSchema.validate(req.body);
-	if (error) {
-		const msg = error.details.map((el) => el.message).join(",");
-		throw new ExpressError(400, msg);
-	} else {
-		next();
-	}
-};
+// middlewares
+const { isLoggedIn, isAuthor, validateCamp } = require("../middleware");
 
 // all campgrounds
 router.get("/", async (req, res) => {
@@ -37,6 +21,7 @@ router.get("/new", isLoggedIn, (req, res) => {
 // adding new campground to db
 router.post("/", isLoggedIn, validateCamp, async (req, res) => {
 	const newcamp = new Campground(req.body.campground);
+	newcamp.author = req.user._id;
 	await newcamp.save();
 	req.flash("success", "New campground added successfully");
 	res.redirect(`/campgrounds/${newcamp._id}`);
@@ -44,7 +29,14 @@ router.post("/", isLoggedIn, validateCamp, async (req, res) => {
 
 // show
 router.get("/:id", async (req, res) => {
-	const camp = await Campground.findById(req.params.id).populate("reviews");
+	const camp = await Campground.findById(req.params.id)
+		.populate({
+			path: "reviews",
+			populate: {
+				path: "author",
+			},
+		})
+		.populate("author");
 	if (!camp) {
 		req.flash("error", "Campground not found !!");
 		return res.redirect("/campgrounds");
@@ -53,7 +45,7 @@ router.get("/:id", async (req, res) => {
 });
 
 // edit form
-router.get("/:id/edit", isLoggedIn, async (req, res) => {
+router.get("/:id/edit", isLoggedIn, isAuthor, async (req, res) => {
 	const camp = await Campground.findById(req.params.id);
 	if (!camp) {
 		req.flash("error", "Campground not found !!");
@@ -63,14 +55,14 @@ router.get("/:id/edit", isLoggedIn, async (req, res) => {
 });
 
 // edit in db
-router.put("/:id", validateCamp, isLoggedIn, async (req, res) => {
+router.put("/:id", isLoggedIn, isAuthor, validateCamp, async (req, res) => {
 	await Campground.findByIdAndUpdate(req.params.id, req.body.campground);
 	req.flash("success", "Campground updated successfully");
 	res.redirect(`/campgrounds/${req.params.id}`);
 });
 
 // delete
-router.delete("/:id", isLoggedIn, async (req, res) => {
+router.delete("/:id", isLoggedIn, isAuthor, async (req, res) => {
 	await Campground.findByIdAndDelete(req.params.id);
 	req.flash("delete", "Campground deleted successfully");
 	res.redirect("/campgrounds");
