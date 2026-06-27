@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/Krish-7947/YelpCamp#readme",
   "dependencies": {
+    "@maptiler/client": "^3.0.2",
     "axios": "^1.18.0",
     "cloudinary": "^1.41.3",
     "connect-flash": "^0.1.1",

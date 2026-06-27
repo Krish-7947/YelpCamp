@@ -1,6 +1,9 @@
 const Campground = require("../models/campground");
 const { cloudinary } = require("../cloudinary/index");
 
+const maptilerClient = require("@maptiler/client");
+maptilerClient.config.apiKey = process.env.MAPTILER_API_KEY;
+
 module.exports.index = async (req, res) => {
 	const campgrounds = await Campground.find({});
 	res.render("campgrounds/index", { campgrounds });
@@ -17,6 +20,23 @@ module.exports.newCampground = async (req, res) => {
 		url: obj.path,
 		filename: obj.filename,
 	}));
+
+	const geoData = await maptilerClient.geocoding.forward(
+		req.body.campground.location,
+		{ limit: 1 },
+	);
+	console.log(geoData.features[0].geometry);
+	if (!geoData.features?.length) {
+		req.flash(
+			"error",
+			"Could not geocode that location. Please try again and enter a valid location.",
+		);
+		return res.redirect("/campgrounds/new");
+	}
+
+	newcamp.geometry = geoData.features[0].geometry;
+	newcamp.location = geoData.features[0].place_name;
+
 	await newcamp.save();
 	req.flash("success", "New campground added successfully");
 	res.redirect(`/campgrounds/${newcamp._id}`);
@@ -65,6 +85,22 @@ module.exports.editCampground = async (req, res) => {
 			$pull: { images: { filename: { $in: req.body.deleteImages } } },
 		});
 	}
+
+	const geoData = await maptilerClient.geocoding.forward(
+		req.body.campground.location,
+		{ limit: 1 },
+	);
+	if (!geoData.features?.length) {
+		req.flash(
+			"error",
+			"Could not geocode that location. Please try again and enter a valid location.",
+		);
+		return res.redirect(`/campgrounds/${id}/edit`);
+	}
+
+	camp.geometry = geoData.features[0].geometry;
+	camp.location = geoData.features[0].place_name;
+
 	await camp.save();
 	req.flash("success", "Campground updated successfully");
 	res.redirect(`/campgrounds/${req.params.id}`);

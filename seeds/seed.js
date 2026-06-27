@@ -1,5 +1,5 @@
 if (process.env.NODE_ENV !== "production") {
-	require("dotenv").config();
+	require("dotenv").config({ quiet: true });
 }
 
 const mongoose = require("mongoose");
@@ -61,6 +61,13 @@ const Seed_Data_Base = async () => {
 					},
 				],
 				price,
+				geometry: {
+					type: "Point",
+					coordinates: [
+						cities[random].longitude,
+						cities[random].latitude,
+					],
+				},
 				description:
 					"Lorem ipsum dolor sit amet consectetur adipisicing elit. Reprehenderit fugiat eum quis, dolor placeat enim, aspernatur hic distinctio saepe nisi unde? Vero dicta quidem ut animi totam id, repudiandae reiciendis.",
 			});
