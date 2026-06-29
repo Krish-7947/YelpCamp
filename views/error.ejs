@@ -12,8 +12,10 @@
 					<%= err.status %> | <%= err.message %>
 				</h3>
 			</div>
+			<% if(process.env.NODE_ENV !== 'production') {%>
 			<hr />
 			<p><%= err.stack %></p>
+			<% } %>
 		</div>
 	</div>
 </div>

@@ -13,18 +13,65 @@ const session = require("express-session");
 const flash = require("connect-flash");
 const passport = require("passport");
 const passportLocal = require("passport-local");
+const helmet = require("helmet");
 
 const app = express();
+
+// Security stuff
+app.use(helmet());
+
+// allowed content
+const scriptSrcUrls = [
+	"https://stackpath.bootstrapcdn.com/",
+	"https://kit.fontawesome.com/",
+	"https://cdnjs.cloudflare.com/",
+	"https://cdn.jsdelivr.net",
+	"https://cdn.maptiler.com/",
+];
+const styleSrcUrls = [
+	"https://kit-free.fontawesome.com/",
+	"https://stackpath.bootstrapcdn.com/",
+	"https://fonts.googleapis.com/",
+	"https://use.fontawesome.com/",
+	"https://cdn.jsdelivr.net",
+	"https://cdn.maptiler.com/",
+];
+const connectSrcUrls = ["https://api.maptiler.com/"];
+const fontSrcUrls = [];
+app.use(
+	helmet.contentSecurityPolicy({
+		directives: {
+			defaultSrc: [],
+			connectSrc: ["'self'", ...connectSrcUrls],
+			scriptSrc: ["'unsafe-inline'", "'self'", ...scriptSrcUrls],
+			styleSrc: ["'self'", "'unsafe-inline'", ...styleSrcUrls],
+			workerSrc: ["'self'", "blob:"],
+			objectSrc: [],
+			imgSrc: [
+				"'self'",
+				"blob:",
+				"data:",
+				"https://res.cloudinary.com/z8occoni/",
+				"https://images.unsplash.com",
+				"https://images.pexels.com",
+			],
+			fontSrc: ["'self'", ...fontSrcUrls],
+		},
+	}),
+);
 
 // Session Stuff
 app.use(
 	session({
+		name: "session",
 		secret: "nothingfornow",
 		resave: false,
 		saveUninitialized: true,
 		cookie: {
 			httpOnly: true,
+			// secure:true,
 			expires: Date.now() + 7 * 24 * 60 * 60 * 1000,
+			maxAge: 7 * 24 * 60 * 60 * 1000,
 		},
 	}),
 );
@@ -56,6 +103,7 @@ const reviewRouter = require("./routes/reviews");
 const userRouter = require("./routes/users");
 
 // MongoDB connection
+mongoose.set("sanitizeFilter", true);
 mongoose.connect("mongodb://127.0.0.1:27017/YelpCamp");
 
 const db = mongoose.connection;

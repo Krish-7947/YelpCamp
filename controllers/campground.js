@@ -25,7 +25,6 @@ module.exports.newCampground = async (req, res) => {
 		req.body.campground.location,
 		{ limit: 1 },
 	);
-	console.log(geoData.features[0].geometry);
 	if (!geoData.features?.length) {
 		req.flash(
 			"error",

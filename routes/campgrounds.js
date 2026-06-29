@@ -16,8 +16,8 @@ router
 	.get(campgroundFunctions.index)
 	.post(
 		isLoggedIn,
-		validateCamp,
 		upload.array("campground[image]"),
+		validateCamp,
 		campgroundFunctions.newCampground,
 	);
 
@@ -29,8 +29,8 @@ router
 	.put(
 		isLoggedIn,
 		isAuthor,
-		validateCamp,
 		upload.array("campground[image]"),
+		validateCamp,
 		campgroundFunctions.editCampground,
 	)
 	.delete(isLoggedIn, isAuthor, campgroundFunctions.deleteCampground);
