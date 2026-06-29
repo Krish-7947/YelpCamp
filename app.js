@@ -77,6 +77,11 @@ app.use(methodoverride("_method"));
 app.use(express.static(path.join(__dirname, "public")));
 
 // Router Set Up
+
+app.get("/", (req, res) => {
+	res.render("home");
+});
+
 app.use("/campgrounds", campgroundRouter);
 app.use("/campgrounds/:id/reviews", reviewRouter);
 app.use("/", userRouter);
@@ -89,5 +94,5 @@ app.all("/{*path}", (req, res, next) => {
 app.use((err, req, res, next) => {
 	if (!err.message) err.message = "Something Went Wrong !!";
 	if (!err.status) err.status = 500;
-	res.status(err.status).render("campgrounds/error", { err });
+	res.status(err.status).render("error", { err });
 });
