@@ -14,8 +14,52 @@ const flash = require("connect-flash");
 const passport = require("passport");
 const passportLocal = require("passport-local");
 const helmet = require("helmet");
+const { MongoStore } = require("connect-mongo");
 
 const app = express();
+
+// MongoDB connection
+const dbURL = process.env.DB_URL || "mongodb://127.0.0.1:27017/YelpCamp";
+mongoose.set("sanitizeFilter", true);
+mongoose.connect(dbURL);
+
+const db = mongoose.connection;
+db.on("error", (e) => console.error("Connection error:", e));
+db.once("open", () => console.log("Connection Successful!"));
+
+//server set up
+const port = process.env.PORT || 3000;
+app.listen(port, () => console.log(`serving on port ${port}`));
+
+// Session Stuff
+const secret = process.env.SECRET || "nothingfornow!";
+const store = MongoStore.create({
+	mongoUrl: dbURL,
+	touchAfter: 24 * 60 * 60,
+	crypto: {
+		secret,
+	},
+});
+
+store.on("error", function (e) {
+	console.log("SESSION STORE ERROR", e);
+});
+
+app.use(
+	session({
+		store,
+		name: "session",
+		secret,
+		resave: false,
+		saveUninitialized: true,
+		cookie: {
+			httpOnly: true,
+			// secure:true,
+			expires: Date.now() + 7 * 24 * 60 * 60 * 1000,
+			maxAge: 7 * 24 * 60 * 60 * 1000,
+		},
+	}),
+);
 
 // Security stuff
 app.use(helmet());
@@ -60,22 +104,6 @@ app.use(
 	}),
 );
 
-// Session Stuff
-app.use(
-	session({
-		name: "session",
-		secret: "nothingfornow",
-		resave: false,
-		saveUninitialized: true,
-		cookie: {
-			httpOnly: true,
-			// secure:true,
-			expires: Date.now() + 7 * 24 * 60 * 60 * 1000,
-			maxAge: 7 * 24 * 60 * 60 * 1000,
-		},
-	}),
-);
-
 // Passport Authentication
 const User = require("./models/user");
 
@@ -101,17 +129,6 @@ app.use((req, res, next) => {
 const campgroundRouter = require("./routes/campgrounds");
 const reviewRouter = require("./routes/reviews");
 const userRouter = require("./routes/users");
-
-// MongoDB connection
-mongoose.set("sanitizeFilter", true);
-mongoose.connect("mongodb://127.0.0.1:27017/YelpCamp");
-
-const db = mongoose.connection;
-db.on("error", (e) => console.error("Connection error:", e));
-db.once("open", () => console.log("Connection Successful!"));
-
-//server set up
-app.listen(3000, () => console.log("server started"));
 
 // setting up ejs template
 app.engine("ejs", ejs_mate);
