@@ -19,7 +19,8 @@ const { MongoStore } = require("connect-mongo");
 const app = express();
 
 // MongoDB connection
-const dbURL = process.env.DB_URL || "mongodb://127.0.0.1:27017/YelpCamp";
+// const dbURL = process.env.DB_URL || "mongodb://127.0.0.1:27017/YelpCamp";
+const dbURL = "mongodb://127.0.0.1:27017/YelpCamp";
 mongoose.set("sanitizeFilter", true);
 mongoose.connect(dbURL);
 
@@ -80,12 +81,16 @@ const styleSrcUrls = [
 	"https://cdn.jsdelivr.net",
 	"https://cdn.maptiler.com/",
 ];
-const connectSrcUrls = ["https://api.maptiler.com/"];
+const connectSrcUrls = [
+	"https://api.maptiler.com/",
+	"https://cdn.jsdelivr.net",
+	"https://cdn.maptiler.com/",
+];
 const fontSrcUrls = [];
 app.use(
 	helmet.contentSecurityPolicy({
 		directives: {
-			defaultSrc: [],
+			defaultSrc: ["'self'"],
 			connectSrc: ["'self'", ...connectSrcUrls],
 			scriptSrc: ["'unsafe-inline'", "'self'", ...scriptSrcUrls],
 			styleSrc: ["'self'", "'unsafe-inline'", ...styleSrcUrls],
@@ -98,6 +103,7 @@ app.use(
 				"https://res.cloudinary.com/z8occoni/",
 				"https://images.unsplash.com",
 				"https://images.pexels.com",
+				"https://api.maptiler.com",
 			],
 			fontSrc: ["'self'", ...fontSrcUrls],
 		},

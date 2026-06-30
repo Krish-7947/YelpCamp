@@ -12,10 +12,11 @@ const Campground = require("../models/campground");
 const Review = require("../models/review");
 const User = require("../models/user");
 
-const dbURL = process.env.DB_URL || "mongodb://127.0.0.1:27017/YelpCamp";
-mongoose.connect();
+// const dbURL = process.env.DB_URL || "mongodb://127.0.0.1:27017/YelpCamp";
+const dbURL = "mongodb://127.0.0.1:27017/YelpCamp";
+mongoose.connect(dbURL);
 
-const db = mongoose.connection(dbURL);
+const db = mongoose.connection;
 db.on("error", (e) => console.error("Connection error:", e));
 db.once("open", () => console.log("Connection Successful!"));
 

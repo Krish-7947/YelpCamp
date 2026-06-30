@@ -52,7 +52,7 @@ CampgroundSchema.virtual("properties.popUpMarkup").get(function () {
 });
 
 CampgroundSchema.post("findOneAndDelete", async function (camp) {
-	if (camp) {
+	if (camp && camp.reviews.length) {
 		await Review.deleteMany({ _id: { $in: camp.reviews } });
 	}
 });

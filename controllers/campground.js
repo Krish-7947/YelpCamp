@@ -4,9 +4,24 @@ const { cloudinary } = require("../cloudinary/index");
 const maptilerClient = require("@maptiler/client");
 maptilerClient.config.apiKey = process.env.MAPTILER_API_KEY;
 
+function escapeRegex(string) {
+	return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
 module.exports.index = async (req, res) => {
-	const campgrounds = await Campground.find({});
-	res.render("campgrounds/index", { campgrounds });
+	const search =
+		typeof req.query.search === "string" ? req.query.search.trim() : "";
+
+	const regex = new RegExp(escapeRegex(search), "i");
+
+	const filter = search
+		? {
+				$or: [{ title: regex }, { location: regex }],
+			}
+		: {};
+
+	const campgrounds = await Campground.find(filter);
+	res.render("campgrounds/index", { campgrounds, search });
 };
 
 module.exports.newForm = async (req, res) => {

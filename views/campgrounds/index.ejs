@@ -1,9 +1,16 @@
 <% layout('layouts/boilerplate.ejs') %>
-
+<h1>hello <%= campgrounds.length %></h1>
 <div id="map" class="mb-3" style="width: 100%; height: 500px"></div>
+<div class="w-60 my-4">
+	<form class="d-flex mb-3 mx-5" action="/campgrounds" method="GET">
+		<input type="search" name="search" value="<%= search || '' %>" class="form-control me-2" placeholder="Search by title or location...">
+		<button class="btn btn-primary">Search</button>
+	</form>
 
-<h1 class="text-center mb-3">All campgrounds</h1>
-
+	<% if (campgrounds.length === 0) { %>
+	<p class="text-center mx-5">No campgrounds found<% if (search) { %> for "<%= search %>"<% } %>.</p>
+	<% } %>
+</div>
 <section class="d-flex flex-wrap gap-3 mb-4 mx-5">
 	<% for(let camp of campgrounds){ %>
 	<div class="card" style="width: 18rem;">
