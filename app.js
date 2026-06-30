@@ -19,8 +19,7 @@ const { MongoStore } = require("connect-mongo");
 const app = express();
 
 // MongoDB connection
-// const dbURL = process.env.DB_URL || "mongodb://127.0.0.1:27017/YelpCamp";
-const dbURL = "mongodb://127.0.0.1:27017/YelpCamp";
+const dbURL = process.env.DB_URL || "mongodb://127.0.0.1:27017/YelpCamp";
 mongoose.set("sanitizeFilter", true);
 mongoose.connect(dbURL);
 
